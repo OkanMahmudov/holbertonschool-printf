@@ -1,47 +1,47 @@
-#include <stdio.h>
-#include <stdarg.h>
+#include "main.h"
 
+/**
+ * _printf - Prints the given format with variables.
+ * @format: Main format
+ *
+ * Return: Number of the chars printed.
+ */
 int _printf(const char *format, ...)
 {
-    va_list args;
-    int printed_chars = 0;
-    const char *ptr;
-    char c;
-    char *str;
+	va_list arg;
+	int len = 0, i = 0;
+	char crntchar, *crntstring;
 
-    va_start(args, format); // Инициализация списка аргументов
-
-    // Проходим по строке формата
-    for (ptr = format; *ptr != '\0'; ptr++) 
-    {
-        if (*ptr == '%' && (*(ptr + 1) == 'c' || *(ptr + 1) == 's' || *(ptr + 1) == '%')) 
-        {
-            // Обрабатываем спецификатор '%c'
-            if (*(ptr + 1) == 'c') {
-                c = va_arg(args, int); // Получаем символ
-                putchar(c);
-                printed_chars++;
-            }
-            // Обрабатываем спецификатор '%s'
-            else if (*(ptr + 1) == 's') {
-                str = va_arg(args, char*); // Получаем строку
-                fputs(str, stdout); // Выводим строку
-                printed_chars += strlen(str);
-            }
-            // Обрабатываем спецификатор '%%'
-            else if (*(ptr + 1) == '%') {
-                putchar('%');
-                printed_chars++;
-            }
-            ptr++; // Пропускаем символ после '%' (например, 'c', 's' или '%')
-        } 
-        else {
-            putchar(*ptr); // Просто выводим символ
-            printed_chars++;
-        }
-    }
-
-    va_end(args); // Завершаем работу с переменными аргументами
-    return printed_chars; // Возвращаем количество напечатанных символов
+	va_start(arg, format);
+	while (format[i])
+	{
+		if (format[i] == '%')
+			switch (format[i + 1])
+			{
+				case 'c':
+					crntchar = (char)va_arg(arg, int);
+					write_char(&len, crntchar), i += 2;
+					break;
+				case 's':
+					crntstring = va_arg(arg, char*);
+					write_str(&len, crntstring), i += 2;
+					break;
+				case 'd':
+				case 'i':
+					write_int(&len, va_arg(arg, int)), i += 2;
+					break;
+				case '%':
+					write_char(&len, '%'), i += 2;
+					break;
+				case '\0':
+					continue;
+				default:
+					write_char(&len, format[i]), i++;
+					break;
+			}
+		else
+			write_char(&len, format[i]), i++;
+	}
+	va_end(arg);
+	return (len);
 }
-
